@@ -35,6 +35,10 @@
 #include "net-utils.h"
 #include "sys-socket.h"
 
+#if !defined(TCP_KEEPIDLE) && defined(TCP_KEEPALIVE) && defined(__APPLE__)
+#define TCP_KEEPIDLE TCP_KEEPALIVE
+#endif
+
 /**
  * red_socket_set_keepalive:
  * @fd: a socket file descriptor
@@ -57,7 +61,7 @@ bool red_socket_set_keepalive(int fd, bool enable, int timeout)
         return true;
     }
 
-#ifdef HAVE_TCP_KEEPIDLE
+#ifdef TCP_KEEPIDLE
     if (setsockopt(fd, IPPROTO_TCP, TCP_KEEPIDLE, &timeout, sizeof(timeout)) == -1) {
         if (errno != ENOTSUP) {
             g_warning("setsockopt for keepalive timeout failed, %s", strerror(errno));
