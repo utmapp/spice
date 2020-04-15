@@ -45,6 +45,25 @@
 #define NOTSUP_ERROR(err) ((err) == ENOTSUP)
 #endif
 
+static inline bool
+darwin_einval_on_unix_socket(int fd, int err)
+{
+#if defined(__APPLE__)
+    if (err == EINVAL) {
+        union {
+            struct sockaddr sa;
+            char buf[1024];
+        } addr;
+        socklen_t len = sizeof(addr);
+
+        if (getsockname(fd, &addr.sa, &len) == 0 && addr.sa.sa_family == AF_UNIX) {
+            return true;
+        }
+    }
+#endif
+    return false;
+}
+
 /**
  * red_socket_set_keepalive:
  * @fd: a socket file descriptor
@@ -57,7 +76,7 @@ bool red_socket_set_keepalive(int fd, bool enable, int timeout)
     int keepalive = !!enable;
 
     if (setsockopt(fd, SOL_SOCKET, SO_KEEPALIVE, &keepalive, sizeof(keepalive)) == -1) {
-        if (!NOTSUP_ERROR(errno)) {
+        if (!NOTSUP_ERROR(errno) && !darwin_einval_on_unix_socket(fd, errno)) {
             g_warning("setsockopt for keepalive failed, %s", strerror(errno));
             return false;
         }
@@ -69,7 +88,7 @@ bool red_socket_set_keepalive(int fd, bool enable, int timeout)
 
 #ifdef TCP_KEEPIDLE
     if (setsockopt(fd, IPPROTO_TCP, TCP_KEEPIDLE, &timeout, sizeof(timeout)) == -1) {
-        if (!NOTSUP_ERROR(errno)) {
+        if (!NOTSUP_ERROR(errno) && !darwin_einval_on_unix_socket(fd, errno)) {
             g_warning("setsockopt for keepalive timeout failed, %s", strerror(errno));
             return false;
         }
@@ -92,7 +111,8 @@ bool red_socket_set_no_delay(int fd, bool no_delay)
 
     if (setsockopt(fd, IPPROTO_TCP, TCP_NODELAY,
                    &optval, sizeof(optval)) != 0) {
-        if (!NOTSUP_ERROR(errno) && errno != ENOPROTOOPT) {
+        if (!NOTSUP_ERROR(errno) && errno != ENOPROTOOPT &&
+            !darwin_einval_on_unix_socket(fd, errno)) {
             spice_warning("setsockopt failed, %s", strerror(errno));
             return false;
         }
