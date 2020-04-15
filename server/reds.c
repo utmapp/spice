@@ -2458,6 +2458,7 @@ static RedLinkInfo *reds_init_client_connection(RedsState *reds, int socket)
     }
 
     red_socket_set_keepalive(socket, TRUE, KEEPALIVE_TIMEOUT);
+    red_socket_set_nosigpipe(socket, true);
 
     link = g_new0(RedLinkInfo, 1);
     link->reds = reds;

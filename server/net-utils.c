@@ -150,3 +150,15 @@ int red_socket_get_no_delay(int fd)
 
     return delay_val;
 }
+
+/**
+ * red_socket_set_nosigpipe
+ * @fd: a socket file descriptor
+ */
+void red_socket_set_nosigpipe(int fd, bool enable)
+{
+#if defined(SO_NOSIGPIPE) && defined(__APPLE__)
+    int val = !!enable;
+    setsockopt(fd, SOL_SOCKET, SO_NOSIGPIPE, (const void *) &val, sizeof(val));
+#endif
+}

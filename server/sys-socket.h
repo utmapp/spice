@@ -139,4 +139,8 @@ int socket_newpair(int type, int protocol, int sv[2]);
 #define socketpair(family, type, protocol, sv) socket_newpair(type, protocol, sv)
 #endif
 
+#if defined(SO_NOSIGPIPE) && defined(__APPLE__)
+#define MSG_NOSIGNAL 0
+#endif
+
 #endif // RED_SYS_SOCKET_H_
