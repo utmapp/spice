@@ -86,7 +86,6 @@ int main(int argc, char **argv)
     pid_t kvm_pid = 0;
     uint32_t num_of_nodes = 0;
     size_t shm_size;
-    size_t shm_old_size;
     int shm_name_len;
     int ret = EXIT_FAILURE;
     int fd;
@@ -142,11 +141,11 @@ int main(int argc, char **argv)
         printf("spice statistics\n\n");
         if (num_of_nodes != reds_stat->num_of_nodes) {
             num_of_nodes = reds_stat->num_of_nodes;
-            shm_old_size = shm_size;
+            munmap(reds_stat, shm_size);
             shm_size = header_size + num_of_nodes * sizeof(SpiceStatNode);
-            reds_stat = mremap(reds_stat, shm_old_size, shm_size, MREMAP_MAYMOVE);
+            reds_stat = (SpiceStat *)mmap(NULL, shm_size, PROT_READ, MAP_SHARED, fd, 0);
             if (reds_stat == (SpiceStat *)MAP_FAILED) {
-                perror("mremap");
+                perror("mmap");
                 goto error;
             }
             reds_nodes = (SpiceStatNode *)((char *) reds_stat + header_size);
