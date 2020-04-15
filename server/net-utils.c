@@ -39,6 +39,12 @@
 #define TCP_KEEPIDLE TCP_KEEPALIVE
 #endif
 
+#if defined(EOPNOTSUPP) && EOPNOTSUPP != ENOTSUP
+#define NOTSUP_ERROR(err) ((err) == ENOTSUP || (err) == EOPNOTSUPP)
+#else
+#define NOTSUP_ERROR(err) ((err) == ENOTSUP)
+#endif
+
 /**
  * red_socket_set_keepalive:
  * @fd: a socket file descriptor
@@ -51,7 +57,7 @@ bool red_socket_set_keepalive(int fd, bool enable, int timeout)
     int keepalive = !!enable;
 
     if (setsockopt(fd, SOL_SOCKET, SO_KEEPALIVE, &keepalive, sizeof(keepalive)) == -1) {
-        if (errno != ENOTSUP) {
+        if (!NOTSUP_ERROR(errno)) {
             g_warning("setsockopt for keepalive failed, %s", strerror(errno));
             return false;
         }
@@ -63,7 +69,7 @@ bool red_socket_set_keepalive(int fd, bool enable, int timeout)
 
 #ifdef TCP_KEEPIDLE
     if (setsockopt(fd, IPPROTO_TCP, TCP_KEEPIDLE, &timeout, sizeof(timeout)) == -1) {
-        if (errno != ENOTSUP) {
+        if (!NOTSUP_ERROR(errno)) {
             g_warning("setsockopt for keepalive timeout failed, %s", strerror(errno));
             return false;
         }
@@ -86,7 +92,7 @@ bool red_socket_set_no_delay(int fd, bool no_delay)
 
     if (setsockopt(fd, IPPROTO_TCP, TCP_NODELAY,
                    &optval, sizeof(optval)) != 0) {
-        if (errno != ENOTSUP && errno != ENOPROTOOPT) {
+        if (!NOTSUP_ERROR(errno) && errno != ENOPROTOOPT) {
             spice_warning("setsockopt failed, %s", strerror(errno));
             return false;
         }
