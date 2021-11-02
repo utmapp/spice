@@ -1182,7 +1182,7 @@ void reds_on_main_agent_data(RedsState *reds, MainChannelClient *mcc, const void
         return;
     case AGENT_MSG_FILTER_MONITORS_CONFIG:
         reds_on_main_agent_monitors_config(reds, mcc, message, size);
-        return;
+        break;
     case AGENT_MSG_FILTER_PROTO_ERROR:
         red_channel_client_shutdown(RED_CHANNEL_CLIENT(mcc));
         return;
