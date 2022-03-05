@@ -25,7 +25,9 @@
 #include <gst/app/gstappsrc.h>
 #include <gst/app/gstappsink.h>
 #include <gst/video/video.h>
+#ifdef HAVE_GST_ORC
 #include <orc/orcprogram.h>
+#endif
 
 #include "red-common.h"
 #include "video-encoder.h"
@@ -1705,6 +1707,7 @@ static void spice_gst_encoder_get_stats(VideoEncoder *video_encoder,
     }
 }
 
+#ifdef HAVE_GST_ORC
 /* Check if ORC library can work.
  * ORC library is used quite extensively by GStreamer
  * to generate code dynamically. If ORC cannot work, GStreamer
@@ -1728,6 +1731,14 @@ static bool orc_check(void)
     }
     return orc_dynamic_code_ok;
 }
+#else // HAVE_GST_ORC
+/* If we don't have Orc, GStreamer will still work
+ */
+static bool orc_check(void)
+{
+    return true;
+}
+#endif
 
 VideoEncoder *gstreamer_encoder_new(SpiceVideoCodecType codec_type,
                                     uint64_t starting_bit_rate,

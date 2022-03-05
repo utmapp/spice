@@ -134,7 +134,11 @@ if spice_server_gst_version != 'no'
     dep = '@0@-@1@'.format(dep, spice_server_gst_version)
     spice_server_deps += dependency(dep)
   endforeach
-  spice_server_deps += dependency('orc-0.4')
+  orc_dep = dependency('orc-0.4', required : false)
+  if orc_dep.found()
+    spice_server_deps += orc_dep
+    spice_server_config_data.set('HAVE_GST_ORC', '1')
+  endif
 
   gst_def = 'HAVE_GSTREAMER'
   if spice_server_gst_version == '1.0'
