@@ -72,8 +72,12 @@ if host_machine.system() != 'windows'
   tests += [
     ['test-stream', true],
     ['test-stat-file', true],
-    ['test-websocket', false],
   ]
+  if host_machine.system() not in ['darwin', 'ios']
+    tests += [
+      ['test-websocket', false],
+    ]
+  endif
 endif
 
 if spice_server_has_gstreamer

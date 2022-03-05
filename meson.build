@@ -102,7 +102,9 @@ foreach dep : ['libjpeg', 'zlib']
   spice_server_deps += dependency(dep)
 endforeach
 
-if host_machine.system() != 'windows'
+if host_machine.system() in ['darwin', 'ios']
+  # librt and libm not required
+elif host_machine.system() != 'windows'
   foreach dep : ['librt', 'libm']
     spice_server_deps += compiler.find_library(dep)
   endforeach
