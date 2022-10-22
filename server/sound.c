@@ -321,7 +321,7 @@ static bool snd_record_handle_write(RecordChannelClient *record_client, size_t s
     memcpy(record_client->samples + write_pos, data, now << 2);
 
     if (size) {
-        memcpy(record_client->samples, data + now, size << 2);
+        memcpy(record_client->samples, data + (now << 2), size << 2);
     }
 
     if (record_client->write_pos - record_client->read_pos > RECORD_SAMPLES_SIZE) {
