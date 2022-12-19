@@ -703,7 +703,6 @@ void spice_qxl_gl_scanout(QXLInstance *qxl,
     spice_return_if_fail(qxl != NULL);
 
     QXLState *qxl_state = qxl->st;
-    spice_return_if_fail(qxl_state->gl_draw_cookie == GL_DRAW_COOKIE_INVALID);
 
     pthread_mutex_lock(&qxl_state->scanout_mutex);
 
